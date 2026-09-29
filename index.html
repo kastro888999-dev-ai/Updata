@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Updata — Visor JSON/CSV/Markdown/PDF/Office Local</title>
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+
+<body>
+  <header>
+    <div class="logo">Up<span>data</span></div>
+    <div class="tagline">Visor local JSON / CSV / Markdown / PDF — formatea, colapsa, enmascara y copia</div>
+    <span class="badge-local">100% local · sin conexión</span>
+    <select id="fontSelect" title="Tipo de letra de la aplicación">
+      <option value="'Segoe UI', system-ui, sans-serif" selected>Segoe UI</option>
+      <option value="Arial, sans-serif">Arial</option>
+      <option value="Verdana, sans-serif">Verdana</option>
+      <option value="'Trebuchet MS', sans-serif">Trebuchet</option>
+      <option value="Georgia, serif">Georgia</option>
+      <option value="'Times New Roman', serif">Times New Roman</option>
+      <option value="Garamond, serif">Garamond</option>
+      <option value="'Courier New', monospace">Courier New</option>
+      <option value="Consolas, monospace">Consolas</option>
+      <option value="'Comic Sans MS', cursive">Comic Sans</option>
+    </select>
+    <button class="btn" id="themeToggle" title="Cambiar tema">🌙 Dark</button>
+  </header>
+
+  <main>
+    <section class="pane" id="inputPane">
+      <div class="pane-header">
+        <h2>Entrada</h2>
+        <div class="mode-bar">
+          <select id="formatSelect" class="mode-item" title="Datos y código">
+            <option value="auto">Datos: Auto</option>
+            <option value="json">Datos: JSON</option>
+            <option value="csv">Datos: CSV</option>
+            <option value="jtostring">Datos: Java toString</option>
+            <option value="java">Código: Java</option>
+            <option value="html">Código: HTML</option>
+            <option value="python">Código: Python</option>
+          </select>
+          <button class="btn small mode-item" id="mdModeBtn" title="Editor Markdown">✎ Markdown</button>
+          <button class="btn small mode-item" id="pdfModeBtn" title="Lector / editor PDF">📄 PDF</button>
+          <button class="btn small mode-item" id="officeModeBtn" title="Lector de Word y Excel">📊 Office</button>
+          <button class="btn small mode-item" id="gifModeBtn" title="Reproductor / editor de GIF animados">🎞 GIF</button>
+        </div>
+        <button class="btn small" id="openFileBtn" title="Abrir archivo (.json, .csv, .md, .pdf, .docx, .xlsx, .gif, .java, .html, .py)">📂
+          Abrir</button>
+        <input type="file" id="openFileInput" accept=".json,.csv,.md,.markdown,.txt,.pdf,.docx,.xlsx,.xls,.xlsm,.xlsb,.gif,.java,.html,.htm,.py" hidden>
+        <button class="btn primary small" id="formatBtn">Formatear ▸</button>
+        <button class="btn small" id="clearBtn">Limpiar</button>
+        <button class="btn small mode-item" id="addDocBtn" title="Añadir documento en esta sección">➕ Añadir</button>
+      </div>
+      <div id="mdToolbar">
+        <button class="mdbtn" data-md="h1" title="Título grande"><b>H1</b></button>
+        <button class="mdbtn" data-md="h2" title="Título mediano"><b>H2</b></button>
+        <button class="mdbtn" data-md="h3" title="Título pequeño"><b>H3</b></button>
+        <span class="md-sep"></span>
+        <button class="mdbtn" data-md="bold" title="Negrita"><b>B</b></button>
+        <button class="mdbtn" data-md="italic" title="Cursiva"><i>I</i></button>
+        <button class="mdbtn" data-md="strike" title="Tachado"><s>S</s></button>
+        <button class="mdbtn" data-md="code" title="Código en línea">`code`</button>
+        <span class="md-sep"></span>
+        <button class="mdbtn" data-md="ul" title="Lista con viñetas">• Lista</button>
+        <button class="mdbtn" data-md="ol" title="Lista numerada">1. Lista</button>
+        <button class="mdbtn" data-md="task" title="Lista de tareas">☑ Tareas</button>
+        <button class="mdbtn" data-md="quote" title="Cita">❝ Cita</button>
+        <span class="md-sep"></span>
+        <button class="mdbtn" data-md="table" title="Insertar tabla">▦ Tabla</button>
+        <button class="mdbtn" data-md="codeblock" title="Bloque de código">{ } Bloque código</button>
+        <button class="mdbtn" data-md="link" title="Enlace">🔗 Enlace</button>
+        <button class="mdbtn" data-md="image" title="Imagen">🖼 Imagen</button>
+        <button class="mdbtn" data-md="hr" title="Línea separadora">— Separador</button>
+        <span class="md-sep"></span>
+        <span class="color-dot" id="mdColorDot" title="Color de letra"></span>
+        <input type="color" id="mdColor" value="#e5233d" title="Color de letra">
+        <button class="mdbtn" id="mdColorBtn" title="Aplicar color al texto seleccionado">🎨 Color</button>
+        <span class="md-sep"></span>
+        <button class="mdbtn" id="mdUndoBtn" title="Deshacer (Ctrl+Z)">↺ Deshacer</button>
+      </div>
+      <div id="docsBox">
+        <div id="dataDocsBox"></div>
+        <div id="mdDocsBox"></div>
+      </div>
+      <div id="pdfPanel">
+        <div class="pdf-drop" id="pdfDrop">
+          <input type="file" id="pdfFile" accept="application/pdf" hidden>
+          <p>📄 Arrastra un PDF aquí<br>o</p>
+          <button class="btn primary small" id="pdfPickBtn">Elegir archivo…</button>
+        </div>
+        <div id="pdfPagesBox" hidden>
+          <div class="pdf-actions">
+            <span class="status" id="pdfInfo"></span>
+          </div>
+          <div class="pdf-actions">
+            <input type="file" id="pdfAppendFile" accept="application/pdf" hidden>
+            <button class="btn small" id="pdfAppendBtn" title="Añadir las páginas de otro PDF al final">➕ Añadir
+              PDF</button>
+          </div>
+          <p class="pdf-hint">Arrastra las miniaturas para <b>reordenar</b>. ⧉ duplica, ⟳ rota y ✕ elimina la
+            página.</p>
+          <div id="pdfPages"></div>
+        </div>
+      </div>
+      <div id="officePanel">
+        <div class="pdf-drop" id="officeDrop">
+          <input type="file" id="officeFile" accept=".docx,.xlsx,.xls,.xlsm,.xlsb" hidden>
+          <p>📊 Arrastra un Word o Excel aquí<br>o</p>
+          <button class="btn primary small" id="officePickBtn">Elegir archivo…</button>
+        </div>
+        <div id="officeInfoBox" hidden>
+          <div class="pdf-actions">
+            <span class="status" id="officeInfo"></span>
+          </div>
+          <p class="pdf-hint"><b>Excel</b>: elige una hoja con las pestañas. Haz <b>doble clic</b> en una celda para
+            editarla, escribe <b>=SUMA(A1:A5)</b> para fórmulas, y selecciona un rango (arrastrar o Shift+clic) para
+            copiarlo. Exporta como <b>.xlsx</b> o <b>CSV</b>. <b>Word</b>: documento <b>editable</b>; escribe sobre el
+            texto e <b>inserta imágenes</b>. Cópialo o expórtalo como <b>.md</b> / <b>.html</b>.</p>
+        </div>
+      </div>
+      <div id="gifPanel">
+        <div class="pdf-drop" id="gifDrop">
+          <input type="file" id="gifFile" accept="image/gif" hidden>
+          <p>🎞 Arrastra un GIF animado aquí<br>o</p>
+          <button class="btn primary small" id="gifPickBtn">Elegir archivo…</button>
+        </div>
+        <div id="gifInfoBox" hidden>
+          <div class="pdf-actions">
+            <span class="status" id="gifInfo"></span>
+          </div>
+          <div class="pdf-actions">
+            <input type="file" id="gifAppendFile" accept="image/gif" hidden>
+            <button class="btn small" id="gifAppendBtn" title="Añadir las imágenes de otro GIF al final">➕ Añadir
+              GIF</button>
+            <button class="btn small" id="gifAddFrameBtn" title="Añadir un frame nuevo en blanco tras el frame actual">➕
+              Añadir frame</button>
+          </div>
+          <p class="pdf-hint">Reproduce, pausa y navega frame a frame en el visor. Edita cualquier frame
+            (resaltar, pintar, trazo, texto, imagen) y exporta el resultado como <b>PNG</b> o como <b>GIF animado</b> con
+            las ediciones incrustadas.</p>
+          <p class="pdf-hint">Estas son las <b>miniaturas</b>: haz clic para ir a ese frame, <b>arrastra</b> para
+            <b>reordenar</b>, ⧉ duplica y ✕ elimina.</p>
+          <div id="gifFrames" hidden></div>
+        </div>
+      </div>
+      <div class="toolbar-note">Los datos nunca salen de tu equipo.</div>
+    </section>
+
+    <div id="splitter" title="Arrastra para redimensionar (30% – 70%)"></div>
+
+    <section class="pane" id="viewerPane">
+      <div class="pane-header">
+        <h2>Visor</h2>
+        <span class="status" id="status"></span>
+        <button class="btn small" id="expandAll" title="Expandir todo">⊞ Expandir</button>
+        <button class="btn small" id="collapseAll" title="Colapsar todo">⊟ Colapsar</button>
+        <button class="btn small" id="unmaskAll" title="Quitar todas las máscaras">👁 Desenmascarar</button>
+        <span class="viewer-zoom-control" id="viewerZoomControl">
+          <button class="viewer-zoom-btn viewer-zoom-decr" id="zoomOut" title="Acercar (-)">-</button>
+          <span class="viewer-zoom-level" id="zoomLevel" title="Zoom">100%</span>
+          <button class="viewer-zoom-btn viewer-zoom-incr" id="zoomIn" title="Alejar (+)">+</button>
+        </span>
+        <button class="btn small" id="mdExportPdfBtn" title="Exportar la vista previa a PDF" hidden>⤓ Exportar
+          PDF</button>
+        <button class="btn small" id="pdfExportBtn" title="Descargar el PDF tal como se ve en el visor" hidden>⤓
+          Exportar PDF</button>
+        <button class="btn small" id="pdfExportMdBtn" title="Exportar el texto visible como Markdown" hidden>⤓
+          .md</button>
+        <button class="btn small" id="officeCopyBtn" title="Copiar lo que se ve: el rango seleccionado (Excel) o el texto (Word)" hidden>⧉
+          Copiar</button>
+        <button class="btn small" id="officeExportCsvBtn" title="Exportar la hoja activa como CSV" hidden>⤓ CSV</button>
+        <button class="btn small" id="officeExportXlsxBtn" title="Exportar el libro con las ediciones y fórmulas como .xlsx" hidden>⤓
+          .xlsx</button>
+        <button class="btn small" id="officeExportMdBtn" title="Exportar el documento Word como Markdown" hidden>⤓
+          .md</button>
+        <button class="btn small" id="officeExportHtmlBtn" title="Exportar el documento Word (con imágenes) como .html" hidden>⤓
+          .html</button>
+        <button class="btn small" id="gifExportPngBtn" title="Exportar el frame actual (con ediciones) como PNG" hidden>⤓
+          PNG</button>
+        <button class="btn small" id="gifExportGifBtn" title="Exportar la animación completa (con ediciones) como GIF"
+          hidden>⤓ GIF</button>
+        <button class="btn primary small" id="copyAll" title="Copiar todo tal como se ve">⧉ Copiar todo</button>
+        <button class="btn small" id="printBtn" title="Imprimir lo que se ve en el visor (todos los modos)">🖨 Imprimir</button>
+      </div>
+      <div id="pdfTools" hidden>
+        <button class="pdftool active" data-tool="select" title="Seleccionar y copiar texto">🖱 Seleccionar</button>
+        <button class="pdftool" data-tool="highlight" title="Arrastra sobre el texto para resaltar">🖍 Resaltar</button>
+        <button class="pdftool" data-tool="underline" title="Arrastra sobre el texto para subrayar">▁ Subrayar</button>
+        <button class="pdftool" data-tool="redact" title="Arrastra para pintar/tapar una zona">🖌 Pintar</button>
+        <select id="pdfShape" title="Forma para Pintar y Resaltar">
+          <option value="rect" selected>▭ Rectángulo</option>
+          <option value="round">▢ Redondeado</option>
+          <option value="ellipse">◯ Elipse</option>
+          <option value="free">✎ Mano alzada</option>
+        </select>
+        <button class="pdftool" data-tool="text" title="Clic en la página para escribir texto">🅣 Texto</button>
+        <button class="pdftool" data-tool="image" title="Elige una imagen y arrastra dónde ponerla">🖼 Imagen</button>
+        <button class="pdftool" data-tool="snapshot" title="Arrastra una zona para copiarla como imagen">📷 Copiar
+          zona</button>
+        <span class="md-sep"></span>
+        <span class="color-dot" id="pdfColorDot" title="Color seleccionado"></span>
+        <input type="color" id="pdfColor" value="#ffe066" title="Elegir color (paleta / hex)">
+        <input type="text" id="pdfColorHex" value="#ffe066" maxlength="7" spellcheck="false"
+          title="Código hex (#RRGGBB)">
+        <button class="btn small" id="pdfUndoBtn" title="Quitar la última anotación">↺ Deshacer</button>
+        <input type="file" id="pdfImgFile" accept="image/*" hidden>
+      </div>
+      <div id="gifTools" hidden>
+        <button class="pdftool active" data-giftool="select" title="Seleccionar, mover y eliminar textos">🖱
+          Seleccionar</button>
+        <button class="pdftool" data-giftool="highlight" title="Arrastra para resaltar una zona">🖍 Resaltar</button>
+        <button class="pdftool" data-giftool="redact" title="Arrastra para tapar una zona">⬛ Pintar</button>
+        <button class="pdftool" data-giftool="free" title="Arrastra para dibujar a mano alzada">✎ Trazo</button>
+        <button class="pdftool" data-giftool="text" title="Haz clic en el frame para escribir texto">🅣 Texto</button>
+        <button class="pdftool" data-giftool="image" title="Elige una imagen (con recorte) y arrastra dónde ponerla">🖼
+          Imagen</button>
+        <select id="gifShape" title="Forma de Resaltar y Pintar">
+          <option value="rect" selected>▭ Rectángulo</option>
+          <option value="round">▢ Redondeado</option>
+          <option value="ellipse">◯ Elipse</option>
+        </select>
+        <span class="md-sep"></span>
+        <span class="color-dot" id="gifColorDot" title="Color seleccionado"></span>
+        <input type="color" id="gifColor" value="#ffe066" title="Elegir color (paleta / hex)">
+        <input type="text" id="gifColorHex" value="#ffe066" maxlength="7" spellcheck="false"
+          title="Código hex (#RRGGBB)">
+        <button class="btn small" id="gifUndoBtn" title="Deshacer la última edición (Ctrl+Z)">↺ Deshacer</button>
+        <input type="file" id="gifImgFile" accept="image/*" hidden>
+      </div>
+      <div id="officeTools" hidden>
+        <span class="pdftool office-tool-label">Excel:</span>
+        <span class="office-cellref" id="officeCellRef" title="Celda activa">—</span>
+        <input type="text" id="officeFormulaInput" class="office-formula-input"
+          placeholder="Valor o fórmula (p. ej. =SUMA(A1:A5)) + Enter" spellcheck="false"
+          title="Escribe un valor o una fórmula para la celda activa y pulsa Enter">
+        <button class="pdftool" id="officeBoldBtn" title="Negrita (aplica a la selección de celdas)"><b>B</b></button>
+        <button class="pdftool" id="officeItalicBtn" title="Cursiva"><i>I</i></button>
+        <button class="pdftool" id="officeUnderlineBtn" title="Subrayado"><u>S</u></button>
+        <select class="pdftool office-size-select" id="officeFontSize" title="Tamaño de texto">
+          <option value="">Tamaño</option>
+          <option value="2">10</option>
+          <option value="3">12</option>
+          <option value="4">14</option>
+          <option value="5">18</option>
+          <option value="6">24</option>
+          <option value="7">32</option>
+        </select>
+        <input type="color" class="office-color" id="officeFontColor" value="#111111" title="Color de letra">
+        <input type="color" class="office-color" id="officeFillColor" value="#ffffff" title="Color de casilla (fondo)">
+        <select class="pdftool" id="officeAlignH" title="Alineación horizontal">
+          <option value="">Horizontal</option>
+          <option value="left">⬅ Izquierda</option>
+          <option value="center">⬌ Centrar</option>
+          <option value="right">Derecha ➡</option>
+        </select>
+        <select class="pdftool" id="officeAlignV" title="Alineación vertical">
+          <option value="">Vertical</option>
+          <option value="top">⬆ Arriba</option>
+          <option value="middle">⬍ Medio</option>
+          <option value="bottom">⬇ Abajo</option>
+        </select>
+        <button class="btn small" id="officeUndoBtn" title="Deshacer la última edición de celda">↺ Deshacer</button>
+        <span class="md-sep"></span>
+        <span class="pdftool office-tool-label">Word:</span>
+        <button class="pdftool" id="officeWBoldBtn" title="Negrita"><b>N</b></button>
+        <button class="pdftool" id="officeWItalicBtn" title="Cursiva"><i>K</i></button>
+        <button class="pdftool" id="officeWUnderlineBtn" title="Subrayado"><u>S</u></button>
+        <select class="pdftool office-size-select" id="officeWFontSize" title="Tamaño de texto">
+          <option value="">Tamaño</option>
+          <option value="1">Muy pequeño</option>
+          <option value="2">Pequeño</option>
+          <option value="3">Normal</option>
+          <option value="4">Mediano</option>
+          <option value="5">Grande</option>
+          <option value="6">Muy grande</option>
+          <option value="7">Enorme</option>
+        </select>
+        <input type="color" class="office-color" id="officeWFontColor" value="#111111" title="Color de letra">
+        <button class="pdftool" id="officeWAlignLeft" title="Alinear a la izquierda">⬅</button>
+        <button class="pdftool" id="officeWAlignCenter" title="Centrar texto">⬌</button>
+        <button class="pdftool" id="officeWAlignRight" title="Alinear a la derecha">➡</button>
+        <button class="pdftool" id="officeWAlignJustify" title="Justificar texto">☰</button>
+        <select class="pdftool" id="officeWColumns" title="Dividir el contenido en columnas">
+          <option value="">Columnas</option>
+          <option value="1">1 columna</option>
+          <option value="2">2 columnas</option>
+          <option value="3">3 columnas</option>
+        </select>
+        <button class="pdftool" id="officeImgBtn" title="Insertar una imagen en el cursor del documento">🖼 Insertar
+          imagen</button>
+        <input type="file" id="officeImgFile" accept="image/*" hidden>
+      </div>
+      <div id="viewer"></div>
+    </section>
+  </main>
+
+  <footer>Updata · Carlos Augusto Castro · Funciona 100% offline desde index.html</footer>
+  <div id="toast"></div>
+  <!-- Aviso de arrastrar y soltar un archivo en cualquier parte de la ventana -->
+  <div id="globalDropOverlay" hidden>
+    <div class="drop-message">📂 Suelta el archivo para abrirlo</div>
+  </div>
+
+  <!-- Recorte de imagen para la herramienta 🖼 Imagen del modo GIF -->
+  <div id="gifCropModal" class="crop-modal" hidden>
+    <div class="crop-dialog">
+      <div class="crop-toolbar">
+        <strong>Recortar imagen</strong>
+        <button class="btn small primary" id="gifCropBtn">✔ Recortar</button>
+        <button class="btn small" id="gifCropCancel">✕ Cancelar</button>
+      </div>
+      <div class="crop-stage" id="gifCropStage"></div>
+      <p class="crop-hint">Arrastra sobre la imagen para elegir la zona que quieres insertar en el frame.</p>
+    </div>
+  </div>
+
+  <!-- Librerías locales para PDF (100% offline) -->
+  <script src="assets/vendor/pdf.min.js"></script>
+  <script src="assets/vendor/pdf-lib.min.js"></script>
+  <!-- Librerías locales para Office (100% offline) -->
+  <script src="assets/vendor/xlsx.full.min.js"></script>
+  <script src="assets/vendor/mammoth.browser.min.js"></script>
+  <!-- Orden de carga: core (utilidades) → parsers → viewer → markdown → pdf → office → gif → controls (eventos) -->
+  <script src="assets/js/core.js"></script>
+  <script src="assets/js/parsers.js"></script>
+  <script src="assets/js/code.js"></script>
+  <script src="assets/js/viewer.js"></script>
+  <script src="assets/js/markdown.js"></script>
+  <script src="assets/js/pdf.js"></script>
+  <script src="assets/js/office.js"></script>
+  <script src="assets/js/gif.js"></script>
+  <script src="assets/js/manual.js"></script>
+  <script src="assets/js/controls.js"></script>
+</body>
+
+</html>

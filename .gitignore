@@ -1,0 +1,9 @@
+# Metadatos internos del agente de desarrollo
+.coda/
+
+# Guía de desarrollo para agentes (no forma parte del producto)
+AGENTS.md
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
